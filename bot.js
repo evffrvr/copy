@@ -11,8 +11,7 @@ client.on('message', msg => {
   }
 });
 
-var Discord = require("discord.js");
-var client = new Discord.Client();
+
 var data = {};
 async function copyChannel (channel) {
     data[channel.guild.ownerID].channels.push(channel);
