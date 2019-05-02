@@ -1,15 +1,3 @@
-
-
-client.on('ready', () => {
-  console.log(`Logged in as ${client.user.tag}!`);
-});
-
-client.on('message', msg => {
-  if (msg.content === 'يا كلب') {
-    msg.reply('تحت الخدمة');
-  }
-});
-
 const Discord = require('discord.js')
 const bot = new Discord.Client()
 const db = require('quick.db') // لا تنسى تحمل البكج ذا , npm i quick.db@7.0.0-b22
@@ -85,5 +73,9 @@ if(channels != null) {
 }
  }
 })
-
+client.on('message', msg => {
+  if (msg.content === 'يا كلب') {
+    msg.reply('تحت الخدمة');
+  }
+});
 client.login(process.env.BOT_TOKEN);
