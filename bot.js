@@ -1,5 +1,4 @@
-const Discord = require('discord.js');
-const client = new Discord.Client();
+
 
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
@@ -11,65 +10,80 @@ client.on('message', msg => {
   }
 });
 
-
-var data = {};
-async function copyChannel (channel) {
-    data[channel.guild.ownerID].channels.push(channel);
+const Discord = require('discord.js')
+const bot = new Discord.Client()
+const db = require('quick.db') // لا تنسى تحمل البكج ذا , npm i quick.db@7.0.0-b22
+const prefix = "-" // تقدر تغيره
+// ذا كود الباك اب
+bot.on('message', msg => {
+  if(msg.author.bot) return
+  if(msg.content.startsWith(prefix + 'copy')) {
+    db.set(`backup.${msg.author.id}.channels`, [])
+    db.set(`backup.${msg.author.id}.roles`, [])
+    db.set(`backup.${msg.author.id}.categories`, [])
+    let channels = msg.guild.channels.filter(c => c.type === 'text')
+    let categories = msg.guild.channels.filter(c => c.type === 'category')
+    channels.forEach(c => {
+      db.push(`backup.${msg.author.id}.channels`, {cn: c.name, ccn: c.parent.name})
+ 
+    })
+    categories.forEach(c => {
+      db.push(`backup.${msg.author.id}.categories`, c.name)
+ 
+    })
+ 
+    msg.guild.roles.forEach(r => {
+      if(r.name === '@everyone') return
+      db.push(`backup.${msg.author.id}.roles`, {rn: r.name, rc: r.color, rp: r.permissions})
+    })
+ 
+    msg.channel.send(`**Done backup this server**`)
+ 
+  }
+})
+ 
+bot.on('ready', () => {
+  console.log(`backup code by .Daniel#0001`)
+})
+ 
+ 
+// وذا كود اللود load
+bot.on('message', msg => {
+  if(msg.author.bot) return
+  if(msg.content.startsWith(prefix + 'paste')) {
+   let channels = db.get(`backup.${msg.author.id}.channels`)
+   let roles = db.get(`backup.${msg.author.id}.roles`)
+   let categories = db.get(`backup.${msg.author.id}.categories`)
+   if(channels === null && roles === null && categories === null) return msg.channel.send(`**You don't have a backup to be uploaded here.  :/**`)
+  msg.channel.send(`**loading...**`).then(m => {
+    setTimeout(() => {
+                   m.edit(`**done load!**`)
+                 },6000);
+               })
+ 
+if(categories != null) {
+  for(let j = 0; j < categories.length; j++) {
+    msg.guild.createChannel(categories[j], "category")
+  }
 }
-async function copyRole (role) {
-    data[role.guild.ownerID].roles.push(role);
+if(roles != null) {
+for(let r = 0; r < roles.length; r++) {
+msg.guild.createRole({
+  name: roles[r].rn,
+  color: roles[r].rc,
+  permissions: roles[r].rp
+})
 }
-async function paste (guild, copyData) {
-    copyData.channels.forEach(async function (channel) {
-        guild.createChannel(channel.name, channel.type, channel.permissionOverwrites, "- Sweetie paste").then(channel2 => {
-            channel2.setPosition(channel.position);
-        });
-    });
-    copyData.roles.forEach(async function (role) {
-        guild.createRole({
-            name: role.name,
-            color: role.hexColor
-        }).then(async function (role2) {
-            role2.setPosition(role.position);
-        });
-    });
 }
-async function copyAll (guild) {
-    if (!data[guild.ownerID]) {
-        data[guild.ownerID] = {
-            roles: [],
-            channels: [],
-        };
-    }
-    guild.channels.sort(function (a,b) { return a.position - b.position; }).forEach(async function (channel) {
-        copyChannel(channel);
-    });
-    guild.roles.sort(function (a,b) { return a.position - b.position; }).forEach(async function (role) {
-        copyRole(role);
-    });
+if(channels != null) {
+ 
+  for(let i = 0; i < channels.length; i++) {
+    msg.guild.createChannel(channels[i].cn, "text").then(channel => {
+      channel.setParent(msg.guild.channels.find(c => c.name == channels[i].ccn))
+    })
 }
-client.on("message", async function (msg) {
-    if (!prefix || typeof prefix !== "string") {
-        var prefix = "-";
-    }
-    if (!msg.author.bot) {
-        if (msg.content.startsWith(prefix)) {
-            var args = msg.content.slice(prefix.length).split(" ");
-            var command = args[0];
-            switch (command) {
-                case "copy":
-                    if (!msg.guild.ownerID == msg.author.id) return msg.reply("You should be the guild's owner");
-                    copyAll(msg.guild);
-                    msg.reply("done, the server has been copied");
-                break;
-                case "paste":
-                    if (!msg.guild.ownerID == msg.author.id) return msg.reply("You should be the guild's owner");
-                    if (!data[msg.guild.ownerID]) return msg.reply("There is nothing copied");
-                    paste(msg.guild, data[msg.guild.ownerID]);
-                break;
-            }
-        }
-    }
+}
+ }
 })
 
 client.login(process.env.BOT_TOKEN);
