@@ -32,7 +32,7 @@
     "opusscript": "0.0.6",
     "pretty-ms": "^3.2.0",
     "queue": "^4.4.2",
-    "quick.db": "^6.3.2",
+    "quick.db": "7.0.0-b22",
     "short-number": "^1.0.6",
     "simple-youtube-api": "^5.0.2",
     "sqlite": "^2.9.2",
