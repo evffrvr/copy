@@ -73,7 +73,7 @@ if(channels != null) {
 }
  }
 })
-client.on('message', msg => {
+bot.on('message', msg => {
   if (msg.content === 'يا كلب') {
     msg.reply('تحت الخدمة');
   }
